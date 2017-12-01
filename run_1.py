@@ -6,7 +6,7 @@ import sys
 
 weight = 5
 oneLength = round(pow((weight * 5000), 1 / 3)) * 10
-threadCount = 3
+threadCount = 4
 
 threads = []
 workList = []

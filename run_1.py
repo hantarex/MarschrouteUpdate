@@ -6,7 +6,7 @@ import sys
 
 weight = 5
 oneLength = round(pow((weight * 5000), 1 / 3)) * 10
-threadCount = 4
+threadCount = 3
 
 threads = []
 workList = []
@@ -36,7 +36,7 @@ def getInfo(index, city, left):
         mysql.updatePosition(index)
     # print(index, city, result)
 
-    text = "Запись: " + str(index) + " " + str(city) + " " + str(result) + " осталось: " + str(left) + " Время: " + str(avrReq)
+    text = str(time.ctime()) + ": Запись: " + str(index) + " " + str(city) + " " + str(result) + " осталось: " + str(left) + " Время: " + str(avrReq)
     # sys.stdout.write('\r' + str(text))
     # sys.stdout.flush()
     print(text)

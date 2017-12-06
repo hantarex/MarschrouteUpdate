@@ -1,5 +1,6 @@
 import pymysql.cursors
 from src.define import *
+from termcolor import colored
 
 class Mysql:
     connection = None
@@ -14,27 +15,29 @@ class Mysql:
                                           cursorclass=pymysql.cursors.DictCursor)
 
     def getIndex(self):
-        with self.connection.cursor() as cursor:
-            # Read a single record
-            # sql = "select inx,city from index_city where chk=0 order by city limit %s"
-            sql = "select inx,city from index_city where chk=0 order by city"
-            # cursor.execute(sql, (threadCount, ))
-            cursor.execute(sql)
-            result = cursor.fetchall()
-            return [result, cursor.rowcount]
+        cursor = self.connection.cursor()
+        sql = "select inx,city from index_city where chk=0 order by city"
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        return [result, cursor.rowcount]
 
     def setData(self, index, data):
         try:
-            with self.connection.cursor() as cursor:
-                sql = "insert into marschroute_delivery_utf(`index`,data,data_weight,req_time) " \
-                      "values(%s, %s, %s, %s) " \
-                      "on duplicate key update data=values(data), data_weight=values(data_weight), req_time=values(req_time)"
-                cursor.execute(sql, (index, data['data'], data['data_weight'], data['sec']))
+            cursor = self.connection.cursor()
+            sql = "insert into marschroute_delivery_utf(`index`,data,data_weight,req_time) " \
+                  "values(%s, %s, %s, %s) " \
+                  "on duplicate key update data=values(data), data_weight=values(data_weight), req_time=values(req_time)"
+            cursor.execute(sql, (index, data['data'], data['data_weight'], data['sec']))
             self.connection.commit()
-        finally:
             return True
+        except (AttributeError, pymysql.err.InterfaceError):
+            print(colored('ReInit', 'red'))
+            self.__init__()
+            self.setData(index, data)
 
     def updatePosition(self, index):
+        if len(str(index)) != 6:
+            return False
         try:
             with self.connection.cursor() as cursor:
                 sql = "update index_city set chk=1 where inx=%s"

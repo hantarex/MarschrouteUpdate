@@ -2,6 +2,7 @@ from src.curl import Curl
 from src.mysql import Mysql
 from src.define import *
 import threading, time
+from termcolor import colored
 import sys
 
 weight = 5
@@ -13,6 +14,8 @@ workList = []
 
 
 def getInfo(index, city, left):
+    # print("Старт: ", index)
+    start_time = time.time()
     [req, serialize] = curl.request(url + '/' + apiKey + '/' + pages['delivery'], {
         "index": str(index),
         'weight': 499,
@@ -32,14 +35,23 @@ def getInfo(index, city, left):
         'sec': avrReq,
     })
 
-    if (result == True):
+    if result:
         mysql.updatePosition(index)
+    else:
+        print(index, " - False")
     # print(index, city, result)
+    end_time = time.time()
 
-    text = str(time.ctime()) + ": Запись: " + str(index) + " " + str(city) + " " + str(result) + " осталось: " + str(left) + " Время: " + str(avrReq)
+    if result:
+        resultPrint = colored('True', 'green')
+    else:
+        resultPrint = colored('False', 'red')
+
+    text = str(time.ctime()) + ": Запись: " + str(index) + " " + str(city) + " " + resultPrint + " осталось: " + str(left) + " Время запроса: " + str(avrReq) + " Время функции: " + str(end_time - start_time)
     # sys.stdout.write('\r' + str(text))
     # sys.stdout.flush()
     print(text)
+    # print("Финиш: ", index)
 
 
 curl = Curl()
@@ -51,6 +63,7 @@ for row in res:
     index = row['inx']
     city = row['city']
     t = threading.Event()
+    # print("Вход: ",index)
     x = threading.Thread(target=getInfo, args=(index, city, (count - i)))
     x.start()
     while threading.active_count() > threadCount + 1:
